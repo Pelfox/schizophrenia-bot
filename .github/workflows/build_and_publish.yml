@@ -1,0 +1,60 @@
+name: "Build & publish an image"
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
+      packages: write
+
+    env:
+      IMAGE_NAME: ghcr.io/${{ github.repository }}
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+
+      - name: "Setup Rust toolchain"
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: "1.86.0" # matches Dockerfile
+          components: "clippy"
+
+      - name: "Clippy the code"
+        uses: auguwu/clippy-action@1.4.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Log into GitHub Registry"
+        uses: docker/login-action@v3
+        with:
+          registry: "ghcr.io"
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v3
+
+      - name: "Cache Docker layers"
+        uses: actions/cache@v4
+        with:
+          path: "/tmp/.buildx-cache"
+          key: buildx-main-${{ github.sha }}
+          restore-keys: |
+            buildx-main-
+
+      - name: "Publish the image"
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          context: .
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}

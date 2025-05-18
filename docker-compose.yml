@@ -1,0 +1,29 @@
+services:
+  bot:
+    build: .
+    restart: always
+    env_file: ".env"
+    container_name: "schizophrenia-bot"
+    networks:
+      - internal-network
+      - external-network
+
+  postgres:
+    restart: always
+    hostname: "postgres"
+    image: postgres:17.5-alpine3.21
+    networks:
+      - internal-network
+    volumes:
+      - "pgdata:/var/lib/postgresql/data:rw"
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+
+volumes:
+  pgdata:
+
+networks:
+  internal-network:
+    internal: true
+  external-network:
+    external: true
