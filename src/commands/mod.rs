@@ -6,12 +6,13 @@ mod stats;
 use std::sync::Arc;
 
 use start::handle_start;
+use stats::handle_stats;
 use teloxide::{
     Bot, adaptors::DefaultParseMode, prelude::ResponseResult, types::Message,
     utils::command::BotCommands,
 };
 
-use crate::modules::i18n::I18nLanguage;
+use crate::modules::{database::PgPool, i18n::I18nLanguage};
 
 /// Represents a shared set of bot's commands.
 #[derive(Debug, BotCommands, Clone)]
@@ -31,10 +32,11 @@ pub async fn handle_command(
     bot: DefaultParseMode<Bot>,
     message: Message,
     command: Command,
+    pool: Arc<PgPool>,
     language: Arc<I18nLanguage>,
 ) -> ResponseResult<()> {
     match command {
         Command::Start => handle_start(bot, message, language).await,
-        Command::Stats => todo!(),
+        Command::Stats => handle_stats(bot, message, pool, language).await,
     }
 }

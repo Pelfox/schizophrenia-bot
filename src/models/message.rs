@@ -6,7 +6,7 @@ use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use diesel::{
     ExpressionMethods, Insertable, Selectable,
-    dsl::{insert_into, sql},
+    dsl::{count, insert_into, sql},
     prelude::*,
     sql_types::Float,
 };
@@ -64,4 +64,14 @@ pub async fn get_random_messages_content(
         .order(sql::<Float>("RANDOM()"))
         .load(&mut pool.get()?)
         .context("failed to randomly select messages")
+}
+
+/// Counts the current amount of messages in the specified chat.
+pub async fn count_messages_by_chat(pool: Arc<PgPool>, target_chat_id: i64) -> Result<i64> {
+    use crate::schema::messages::dsl::*;
+    messages
+        .select(count(id))
+        .filter(chat_id.eq(target_chat_id))
+        .first(&mut pool.get()?)
+        .context("failed to count messages")
 }

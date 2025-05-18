@@ -25,6 +25,8 @@ pub struct I18nLanguage {
     pub greeting_message: String,
     /// See `LanguageDice` for more information.
     pub dice: LanguageDice,
+    /// Sent when `/stats` command is executed.
+    pub stats_message: String,
 }
 
 /// Loads a single language from the provided by env (or default) path.
