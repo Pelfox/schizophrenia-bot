@@ -8,7 +8,9 @@
 
 - Building from source: clone the repository, then run `cargo check` to build dependencies and `cargo run` to create a development build. To create a production build, run `cargo build --release`.
 
-> [!IMPORTANT] When building a Docker image, specify the platform `linux/amd64`, if you want to run this image on non-amd64 platform, i.e.: `docker build --platform linux/amd64 -t ghcr.io/pelfox/schizophrenia-bot:latest .`
+> [!IMPORTANT]
+
+> When building a Docker image, specify the platform `linux/amd64`, if you want to run this image on non-amd64 platform, i.e.: `docker build --platform linux/amd64 -t ghcr.io/pelfox/schizophrenia-bot:latest .`
 
 See [.env.example](.env.example) for more information on environment variables.
 
