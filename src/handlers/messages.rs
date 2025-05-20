@@ -27,7 +27,7 @@ const MARKOV_MESSAGES_ORDER: usize = 2;
 const SENTENCES_RANGE: Range<usize> = 5..30;
 
 /// Probability in percents that bot will start a Markov interaction.
-const PERCENT_PROBABILITY: f64 = 20.0;
+const PERCENT_PROBABILITY: f64 = 5.0;
 
 /// Handler for all messages: in parallel tries to reply to a received message
 /// and saves the new message.

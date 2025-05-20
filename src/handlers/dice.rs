@@ -12,7 +12,7 @@ use teloxide::{
 use tokio::time::sleep;
 
 /// Probability in percents that bot will start a dice interaction.
-const PERCENT_PROBABILITY: f64 = 20.0;
+const PERCENT_PROBABILITY: f64 = 30.0;
 
 use crate::{bot::Bot, modules::i18n::I18nLanguage};
 
