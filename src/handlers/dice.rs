@@ -11,10 +11,10 @@ use teloxide::{
 };
 use tokio::time::sleep;
 
+use crate::{bot::Bot, modules::i18n::I18nLanguage};
+
 /// Probability in percents that bot will start a dice interaction.
 const PERCENT_PROBABILITY: f64 = 30.0;
-
-use crate::{bot::Bot, modules::i18n::I18nLanguage};
 
 /// Handles all possible variations of dices.
 pub async fn dice_handler(
@@ -42,9 +42,16 @@ pub async fn dice_handler(
     if let Some(own_dice) = own_message.dice() {
         if own_dice.value > dice.value {
             sleep(Duration::from_secs(2)).await;
-            bot.send_message(message.chat.id, &language.dice.win)
-                .reply_to(message.id)
-                .await?;
+            bot.send_message(
+                message.chat.id,
+                language
+                    .dice
+                    .win
+                    .replace("{mine}", &own_dice.value.to_string())
+                    .replace("{yours}", &dice.value.to_string()),
+            )
+            .reply_to(message.id)
+            .await?;
         }
     }
 
