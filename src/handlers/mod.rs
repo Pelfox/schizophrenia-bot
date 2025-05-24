@@ -9,6 +9,7 @@ use teloxide::{
 
 pub mod dice;
 pub mod greeting;
+pub mod images;
 pub mod messages;
 
 /// Setups all available handlers using middlewares and chaining in it.
@@ -34,9 +35,15 @@ pub fn setup_handlers() -> Handler<'static, DependencyMap, ResponseResult<()>, D
         .filter_map(|msg: Message| msg.new_chat_members().map(|v| v.to_vec()))
         .endpoint(greeting::greeting_handler);
 
+    // images handler
+    let images_branch = dptree::entry()
+        .filter_map(|msg: Message| msg.photo().map(|v| v.to_vec()))
+        .endpoint(images::images_handler);
+
     Update::filter_message()
         .branch(command_branch)
         .branch(messages_branch)
         .branch(dice_branch)
         .branch(greeting_branch)
+        .branch(images_branch)
 }

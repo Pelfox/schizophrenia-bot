@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS images (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    chat_id BIGINT NOT NULL,
+    image_id TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_images_chat_id ON images(chat_id);
