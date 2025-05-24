@@ -16,6 +16,15 @@ pub struct LanguageDice {
     pub win: String,
 }
 
+/// Holder for all stats-related messages.
+#[derive(Debug, Deserialize)]
+pub struct StatsMessage {
+    /// The base message for the response.
+    pub base: String,
+    /// Possible counter plurals.
+    pub plurals: Vec<String>,
+}
+
 /// Generic holder for all i18n contents.
 #[derive(Debug, Deserialize)]
 pub struct I18nLanguage {
@@ -25,8 +34,8 @@ pub struct I18nLanguage {
     pub greeting_message: String,
     /// See `LanguageDice` for more information.
     pub dice: LanguageDice,
-    /// Sent when `/stats` command is executed.
-    pub stats_message: String,
+    /// See `StatsMessage` for more information.
+    pub stats_message: StatsMessage,
 }
 
 /// Loads a single language from the provided by env (or default) path.
