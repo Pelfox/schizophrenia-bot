@@ -16,7 +16,7 @@ use crate::{
     modules::database::PgPool,
 };
 
-/// Handles all incoming messages (saves them).
+/// Handles all incoming images (saves them).
 pub async fn images_handler(
     bot: Bot,
     message: Message,

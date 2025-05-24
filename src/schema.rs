@@ -19,7 +19,13 @@ diesel::table! {
     }
 }
 
-diesel::allow_tables_to_appear_in_same_query!(
-    images,
-    messages,
-);
+diesel::table! {
+    stickers (id) {
+        id -> Int8,
+        created_at -> Timestamptz,
+        chat_id -> Int8,
+        sticker_id -> Text,
+    }
+}
+
+diesel::allow_tables_to_appear_in_same_query!(images, messages, stickers,);

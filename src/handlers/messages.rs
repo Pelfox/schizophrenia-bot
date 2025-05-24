@@ -7,14 +7,17 @@ use markov::Chain;
 use rand::Rng;
 use teloxide::{
     prelude::{Requester, ResponseResult},
-    types::{ChatAction, Message},
+    types::{InputFile, Message},
 };
 use tokio::join;
 
 use crate::{
     bot::Bot,
     database::PgPool,
-    models::message::{NewMessage, create_message, get_random_messages_content},
+    models::{
+        message::{NewMessage, create_message, get_random_messages_content},
+        sticker::get_random_sticker_id,
+    },
 };
 
 /// Minimum amount of messages required for generator to work properly.
@@ -26,8 +29,11 @@ const MARKOV_MESSAGES_ORDER: usize = 2;
 /// Minimum and maximum amount of sentences being taken into final result.
 const SENTENCES_RANGE: Range<usize> = 5..30;
 
-/// Probability in percents that bot will start a Markov interaction.
+/// Probability in percents that bot will start an interaction.
 const PERCENT_PROBABILITY: f64 = 5.0;
+
+/// Probability that bot will start a sticker interaction.
+const STICKER_INTERACTION: f64 = 0.30;
 
 /// Handler for all messages: in parallel tries to reply to a received message
 /// and saves the new message.
@@ -74,8 +80,25 @@ async fn save_message(message: &Message, pool: Arc<PgPool>) -> ResponseResult<()
 
 /// Tries to answer to a message with a specific probability.
 async fn try_answer(bot: Bot, message: &Message, pool: Arc<PgPool>) -> ResponseResult<()> {
-    // answer only with 20% probability
+    // answer only with specific probability
     if !rand::rng().random_bool(PERCENT_PROBABILITY / 100.0) {
+        return Ok(());
+    }
+
+    let x: f64 = rand::rng().random();
+
+    // sticker interaction
+    if x <= STICKER_INTERACTION {
+        let sticker = match get_random_sticker_id(pool, message.chat.id.0).await {
+            Ok(sticker) => sticker,
+            Err(e) => {
+                error!(target: "try_answer", "Failed to retrieve a random sticker: {e}");
+                return Ok(());
+            }
+        };
+
+        bot.send_sticker(message.chat.id, InputFile::file_id(sticker))
+            .await?;
         return Ok(());
     }
 
@@ -91,11 +114,6 @@ async fn try_answer(bot: Bot, message: &Message, pool: Arc<PgPool>) -> ResponseR
     if messages.len() <= MINIMUM_MESSAGES_SIZE {
         return Ok(());
     }
-
-    // send "is typing..." action to show that bot is working since generation
-    // can take some time
-    bot.send_chat_action(message.chat.id, ChatAction::Typing)
-        .await?;
 
     let mut chain = Chain::of_order(MARKOV_MESSAGES_ORDER);
     chain.feed(messages);
