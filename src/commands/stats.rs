@@ -15,20 +15,20 @@ use crate::{
     modules::{database::PgPool, i18n::I18nLanguage},
 };
 
-fn plural_form(n: i64, forms: &[String]) -> String {
-    let n_mod_100 = n % 100;
-
-    let index = if (11..=14).contains(&n_mod_100) {
+/// Pluralizes word based on the provided number and possible forms.
+fn pluralize(value: i64, forms: &[String]) -> String {
+    let index = if (11..=14).contains(&(value % 100)) {
         2
     } else {
-        match n % 10 {
+        match value % 10 {
             1 => 0,
             2..=4 => 1,
             _ => 2,
         }
     };
 
-    forms[index].clone()
+    // TODO: move this formatting out of this
+    format!("<b>{}</b> {}", value, forms[index])
 }
 
 /// Handles `/stats` command sent by user.
@@ -46,15 +46,10 @@ pub async fn handle_stats(
         }
     };
 
-    let plural = plural_form(messages_count, &language.stats_message.plurals);
-
+    let value = pluralize(messages_count, &language.stats_message.plurals);
     bot.send_message(
         message.chat.id,
-        language
-            .stats_message
-            .base
-            .replace("{count}", &messages_count.to_string())
-            .replace("{plural}", &plural),
+        language.stats_message.base.replace("{value}", &value),
     )
     .await?;
     Ok(())
